@@ -2,6 +2,10 @@ PCA using the Eigen linear algebra library
 ------------------------------------------
 Tim Nugent 2014
 
+Used the covariance/eigendecomposition method:
+
+http://en.wikipedia.org/wiki/Principal_component_analysis#Computing_PCA_using_the_covariance_method
+
 Build
 -----
 
