@@ -59,25 +59,25 @@ void PCA::run(){
 	Xcentered = X.rowwise() - X.colwise().mean();
 	C = (Xcentered.adjoint() * Xcentered) / double(X.rows());
 	EigenSolver<MatrixXd> edecomp(C);
-    eigenvalues = edecomp.eigenvalues().real();
-    eigenvectors = edecomp.eigenvectors().real();
-    cumulative.resize(eigenvalues.rows());
-    vector<pair<double,VectorXd> > eigen_pairs; 
-    double c = 0.0; 
-    eigensum = 0.0;  
-    for(unsigned int i = 0; i < eigenvectors.cols(); i++){
-    	eigen_pairs.push_back(make_pair(eigenvalues(i),eigenvectors.col(i)));
-    	eigensum += eigenvalues(i);
-    }
-    // http://stackoverflow.com/questions/5122804/sorting-with-lambda
-    sort(eigen_pairs.begin(),eigen_pairs.end(), [](const pair<double,VectorXd> a, const pair<double,VectorXd> b) -> bool {return (a.first > b.first);} );
-    for(unsigned int i = 0; i < eigen_pairs.size(); i++){
-    	eigenvalues(i) = eigen_pairs[i].first;
-    	c += eigenvalues(i);
-    	cumulative(i) = c;
-    	eigenvectors.col(i) = eigen_pairs[i].second;
-    }
-    transformed = Xcentered * eigenvectors;
+	eigenvalues = edecomp.eigenvalues().real();
+	eigenvectors = edecomp.eigenvectors().real();
+	cumulative.resize(eigenvalues.rows());
+	vector<pair<double,VectorXd> > eigen_pairs; 
+	double c = 0.0; 
+	eigensum = 0.0;  
+	for(unsigned int i = 0; i < eigenvectors.cols(); i++){
+		eigen_pairs.push_back(make_pair(eigenvalues(i),eigenvectors.col(i)));
+		eigensum += eigenvalues(i);
+	}
+    	// http://stackoverflow.com/questions/5122804/sorting-with-lambda
+    	sort(eigen_pairs.begin(),eigen_pairs.end(), [](const pair<double,VectorXd> a, const pair<double,VectorXd> b) -> bool {return (a.first > b.first);} );
+    	for(unsigned int i = 0; i < eigen_pairs.size(); i++){
+		eigenvalues(i) = eigen_pairs[i].first;
+		c += eigenvalues(i);
+		cumulative(i) = c;
+		eigenvectors.col(i) = eigen_pairs[i].second;
+    	}
+    	transformed = Xcentered * eigenvectors;
 
 }
 
@@ -89,13 +89,13 @@ void PCA::print(){
 	cout << "Eigenvalues:" << endl << eigenvalues << endl << endl;	
 	cout << "Eigenvectors:" << endl << eigenvectors << endl << endl;	
 	cout << "Sorted eigenvalues:" << endl;
-    for(unsigned int i = 0; i < eigenvalues.rows(); i++){
-    	cout << "PC " << i+1 << ": Eigenvalue: " << eigenvalues(i);
-    	printf("\t(%3.3f of variance, cumulative =  %3.3f)\n",eigenvalues(i)/eigensum,cumulative(i)/eigensum);
-    	//cout << eigenvectors.col(i) << endl << endl;
-    }
-    cout << endl;
-    cout << "Sorted eigenvectors:" << endl << eigenvectors << endl << endl;	
+    	for(unsigned int i = 0; i < eigenvalues.rows(); i++){
+		cout << "PC " << i+1 << ": Eigenvalue: " << eigenvalues(i);
+		printf("\t(%3.3f of variance, cumulative =  %3.3f)\n",eigenvalues(i)/eigensum,cumulative(i)/eigensum);
+		//cout << eigenvectors.col(i) << endl << endl;
+    	}
+    	cout << endl;
+    	cout << "Sorted eigenvectors:" << endl << eigenvectors << endl << endl;	
 	cout << "Transformed data:" << endl << X * eigenvectors << endl << endl;	
 	cout << "Transformed centred data:" << endl << transformed << endl << endl;	
 
