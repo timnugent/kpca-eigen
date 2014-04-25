@@ -1,0 +1,103 @@
+PCA using the Eigen linear algebra library
+------------------------------------------
+Tim Nugent 2014
+
+Build
+-----
+
+Install Eigen, e.g.:
+
+sudo apt-get install libeigen3-dev
+
+or download from http://eigen.tuxfamily.org/.
+
+Make sure the include path is set right in the Makefile.
+
+Compile with 'make'.
+
+Run
+---
+
+Run with 'make test', or:
+
+bin/pca data/test.data
+
+Input file format is a comma delimited n X p data matrix (n observations, p variables), e.g.:
+
+32.0,26.0,51.0,12.0
+17.0,13.0,34.0,35.0
+10.0,94.0,83.0,45.0
+3.0,72.0,72.0,67.0
+10.0,63.0,35.0,34.0
+
+Output
+------
+
+bin/pca data/test.data
+
+Input data:
+32 26 51 12
+17 13 34 35
+10 94 83 45
+ 3 72 72 67
+10 63 35 34
+
+Centered data:
+ 17.6 -27.6    -4 -26.6
+  2.6 -40.6   -21  -3.6
+ -4.4  40.4    28   6.4
+-11.4  18.4    17  28.4
+ -4.4   9.4   -20  -4.6
+
+Covariance matrix:
+  97.04 -204.04   -70.8 -161.84
+-204.04  893.84   443.8  323.64
+  -70.8   443.8     386   187.2
+-161.84  323.64   187.2  317.84
+
+Eigenvalues:
+1347.01
+211.581
+135.402
+0.721744
+
+Eigenvectors:
+ 0.201491 -0.426243  0.157741 -0.867662
+-0.790673 -0.243348 -0.537975 -0.161871
+-0.450549 -0.390018  0.770297  0.227011
+-0.362276  0.779092   0.30388 -0.411616
+
+Sorted eigenvalues:
+PC 1: Eigenvalue: 1347.01	(0.795 of variance, cumulative =  0.795)
+PC 2: Eigenvalue: 211.581	(0.125 of variance, cumulative =  0.920)
+PC 3: Eigenvalue: 135.402	(0.080 of variance, cumulative =  1.000)
+PC 4: Eigenvalue: 0.721744	(0.000 of variance, cumulative =  1.000)
+
+Sorted eigenvectors:
+ 0.201491 -0.426243  0.157741 -0.867662
+-0.790673 -0.243348 -0.537975 -0.161871
+-0.450549 -0.390018  0.770297  0.227011
+-0.362276  0.779092   0.30388 -0.411616
+
+Transformed data:
+-41.4351 -30.5086  33.9921 -25.3357
+-34.8517  3.59798  32.5138 -23.5428
+-126.006 -24.4494  28.6171 -23.5733
+-113.036  5.31814  37.5604 -25.4912
+-75.8841 -6.75481  4.97735  -24.924
+
+Transformed centred data:
+  36.8075  -19.9493   6.45993 -0.762274
+  43.3909   14.1573   4.98168   1.03062
+ -47.7637  -13.8901   1.08492   1.00009
+ -34.7933   15.8775   10.0283  -0.91779
+  2.35857   3.80454  -22.5548  -0.35065
+
+Written file eigenvectors.csv
+Written file transformed_data.csv
+
+Bugs
+----
+
+timnugent@gmail.com
+
