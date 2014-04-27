@@ -11,5 +11,5 @@ clean:
 	rm bin/pca eigenvectors.csv transformed_data.csv &> /dev/null
 
 test:
-	bin/pca data/test.data
+	bin/pca data/wikipedia.data
 
