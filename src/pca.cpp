@@ -1,4 +1,4 @@
-// PCA using Eigen library by Tim Nugent 2014
+// Kernel PCA using the Eigen library, by Tim Nugent 2014
 
 #include <fstream>
 #include <iostream>
@@ -11,15 +11,25 @@ using namespace std;
 class PCA{
 
 public:
-	PCA(){}
+	PCA() : components(2), kernel_type(1), gamma(0.001), constant(1.0), order(2.0) {}
+	explicit PCA(MatrixXd& d) : components(2), kernel_type(1), gamma(0.001), constant(1.0), order(2.0) {X = d;}
 	void load_data(const char* data, char sep = ',');
-	void run();
+	void set_components(const int i){components = i;};
+	void set_kernel(const int i){kernel_type = i;};	
+	void set_gamma(const int i){gamma = i;};
+	void set_constant(const int i){constant = i;};
+	void set_order(const int i){order = i;};
+	MatrixXd& get_transformed(){return transformed;}	
+	void run_pca();
+	void run_kpca();
 	void print();
 	void write();
 private:
-	MatrixXd X, Xcentered, C, eigenvectors, transformed;
+	double kernel(const VectorXd& a, const VectorXd& b);
+	MatrixXd X, Xcentered, C, K, eigenvectors, transformed;
 	VectorXd eigenvalues, cumulative;
-	double eigensum;
+	unsigned int components, kernel_type;
+	double gamma, constant, order;
 
 };
 
@@ -46,17 +56,93 @@ void PCA::load_data(const char* data, char sep){
 			row++;
 		}
 		file.close();
+		Xcentered.resize(X.rows(),X.cols());
 	}else{
 		cout << "Failed to read file " << data << endl;
 	}
 
 }
 
-void PCA::run(){
+double PCA::kernel(const VectorXd& a, const VectorXd& b){
 
-	// Mean centre and calculate covariance matrix:
+	/*
+		Kernels
+		1 = RBF
+		2 = Polynomial
+		TODO - add some of these these:
+		http://crsouza.blogspot.co.uk/2010/03/kernel-functions-for-machine-learning.html	
+
+	*/
+	switch(kernel_type){
+	    case 2  :
+	    	return(pow(a.dot(b)+constant,order));
+	    default : 
+	    	return(exp(-gamma*((a-b).squaredNorm())));
+	}
+
+}
+
+void PCA::run_kpca(){
+
+	K.resize(X.rows(),X.rows());
+	for(unsigned int i = 0; i < X.rows(); i++){
+		for(unsigned int j = i; j < X.rows(); j++){
+			K(i,j) = K(j,i) = kernel(X.row(i),X.row(j));
+			//printf("k(%i,%i) = %f\n",i,j,K(i,j));
+		}	
+	}	
+	//cout << endl << K << endl;
+
+	EigenSolver<MatrixXd> edecomp(K);
+	eigenvalues = edecomp.eigenvalues().real();
+	eigenvectors = edecomp.eigenvectors().real();
+	cumulative.resize(eigenvalues.rows());
+	vector<pair<double,VectorXd> > eigen_pairs; 
+	double c = 0.0; 
+	for(unsigned int i = 0; i < eigenvectors.cols(); i++){
+		eigen_pairs.push_back(make_pair(eigenvalues(i),eigenvectors.col(i)));
+	}
+	// http://stackoverflow.com/questions/5122804/sorting-with-lambda
+	sort(eigen_pairs.begin(),eigen_pairs.end(), [](const pair<double,VectorXd> a, const pair<double,VectorXd> b) -> bool {return (a.first > b.first);} );
+	for(unsigned int i = 0; i < eigen_pairs.size(); i++){
+		eigenvalues(i) = eigen_pairs[i].first;
+		c += eigenvalues(i);
+		cumulative(i) = c;
+		eigenvectors.col(i) = eigen_pairs[i].second;
+	}
+	transformed.resize(X.rows(),components);
+
+	for(unsigned int i = 0; i < X.rows(); i++){
+		for(unsigned int j = 0; j < components; j++){
+			for (int k = 0; k < K.rows(); k++){
+                transformed(i,j) += K(i,k) * eigenvectors(k,j);
+		 	}
+		}
+	}	
+
+	/*
+	cout << "Input data:" << endl << X << endl << endl;
+	cout << "Centered data:"<< endl << Xcentered << endl << endl;
+	cout << "Centered kernel matrix:" << endl << Kcentered << endl << endl;
+	cout << "Eigenvalues:" << endl << eigenvalues << endl << endl;	
+	cout << "Eigenvectors:" << endl << eigenvectors << endl << endl;	
+	*/
+	cout << "Sorted eigenvalues:" << endl;
+	for(unsigned int i = 0; i < eigenvalues.rows(); i++){
+		if(eigenvalues(i) > 0){
+			cout << "PC " << i+1 << ": Eigenvalue: " << eigenvalues(i);
+			printf("\t(%3.3f of variance, cumulative =  %3.3f)\n",eigenvalues(i)/eigenvalues.sum(),cumulative(i)/eigenvalues.sum());
+		}
+	}
+	cout << endl;
+	//cout << "Sorted eigenvectors:" << endl << eigenvectors << endl << endl;	
+	cout << "Transformed data:" << endl << transformed << endl << endl;	
+}
+
+void PCA::run_pca(){
+
 	// http://stackoverflow.com/questions/15138634/eigen-is-there-an-inbuilt-way-to-calculate-sample-covariance
-	Xcentered = X.rowwise() - X.colwise().mean();
+	Xcentered = X.rowwise() - X.colwise().mean();	
 	C = (Xcentered.adjoint() * Xcentered) / double(X.rows());
 	EigenSolver<MatrixXd> edecomp(C);
 	eigenvalues = edecomp.eigenvalues().real();
@@ -64,20 +150,18 @@ void PCA::run(){
 	cumulative.resize(eigenvalues.rows());
 	vector<pair<double,VectorXd> > eigen_pairs; 
 	double c = 0.0; 
-	eigensum = 0.0;  
 	for(unsigned int i = 0; i < eigenvectors.cols(); i++){
 		eigen_pairs.push_back(make_pair(eigenvalues(i),eigenvectors.col(i)));
-		eigensum += eigenvalues(i);
 	}
-    	// http://stackoverflow.com/questions/5122804/sorting-with-lambda
-    	sort(eigen_pairs.begin(),eigen_pairs.end(), [](const pair<double,VectorXd> a, const pair<double,VectorXd> b) -> bool {return (a.first > b.first);} );
-    	for(unsigned int i = 0; i < eigen_pairs.size(); i++){
+	// http://stackoverflow.com/questions/5122804/sorting-with-lambda
+	sort(eigen_pairs.begin(),eigen_pairs.end(), [](const pair<double,VectorXd> a, const pair<double,VectorXd> b) -> bool {return (a.first > b.first);} );
+	for(unsigned int i = 0; i < eigen_pairs.size(); i++){
 		eigenvalues(i) = eigen_pairs[i].first;
 		c += eigenvalues(i);
 		cumulative(i) = c;
 		eigenvectors.col(i) = eigen_pairs[i].second;
-    	}
-    	transformed = Xcentered * eigenvectors;
+	}
+	transformed = Xcentered * eigenvectors;
 
 }
 
@@ -89,13 +173,14 @@ void PCA::print(){
 	cout << "Eigenvalues:" << endl << eigenvalues << endl << endl;	
 	cout << "Eigenvectors:" << endl << eigenvectors << endl << endl;	
 	cout << "Sorted eigenvalues:" << endl;
-    	for(unsigned int i = 0; i < eigenvalues.rows(); i++){
-		cout << "PC " << i+1 << ": Eigenvalue: " << eigenvalues(i);
-		printf("\t(%3.3f of variance, cumulative =  %3.3f)\n",eigenvalues(i)/eigensum,cumulative(i)/eigensum);
-		//cout << eigenvectors.col(i) << endl << endl;
-    	}
-    	cout << endl;
-    	cout << "Sorted eigenvectors:" << endl << eigenvectors << endl << endl;	
+	for(unsigned int i = 0; i < eigenvalues.rows(); i++){
+		if(eigenvalues(i) > 0){
+			cout << "PC " << i+1 << ": Eigenvalue: " << eigenvalues(i);
+			printf("\t(%3.3f of variance, cumulative =  %3.3f)\n",eigenvalues(i)/eigenvalues.sum(),cumulative(i)/eigenvalues.sum());
+		}
+	}
+	cout << endl;
+	cout << "Sorted eigenvectors:" << endl << eigenvectors << endl << endl;	
 	cout << "Transformed data:" << endl << X * eigenvectors << endl << endl;	
 	cout << "Transformed centred data:" << endl << transformed << endl << endl;	
 
@@ -136,8 +221,12 @@ int main(int argc, const char* argv[]){
 	}
 	PCA* P = new PCA();
 	P->load_data(argv[1]);
-	P->run();
-	P->print();
+	//P->run_pca();
+	//P->print();
+	
+
+
+	P->run_kpca();
 	P->write();
 	delete P;
 	return(0);
