@@ -47,7 +47,7 @@ wikipedia_Polynomial_transformed.png
 
 stdout:
 
-Regular PCA:
+Regular PCA (data/test.data):
 Input data:
 32 26 51 12
 17 13 34 35
@@ -99,7 +99,7 @@ Transformed data:
 -113.036  5.31814  37.5604 -25.4912
 -75.8841 -6.75481  4.97735  -24.924
 
-Kernel PCA - RBF kernel, gamma = 0.001:
+Kernel PCA (data/wikipedia.data) - RBF kernel, gamma = 0.001:
 Sorted eigenvalues:
 PC 1: Eigenvalue: 145.3	(0.931 of variance, cumulative =  0.931)
 PC 2: Eigenvalue: 6.68255	(0.043 of variance, cumulative =  0.974)
@@ -114,7 +114,7 @@ PC 100: Eigenvalue: 8.36113e-18	(0.000 of variance, cumulative =  1.000)
 Written file data/eigenvectors_RBF_data.csv
 Written file data/transformed_RBF_data.csv
 
-Kernel PCA - Polynomial kernel, order = 2, constant = 1:
+Kernel PCA (data/wikipedia.data) - Polynomial kernel, order = 2, constant = 1:
 Sorted eigenvalues:
 PC 1: Eigenvalue: 176542	(0.548 of variance, cumulative =  0.548)
 PC 2: Eigenvalue: 79802.3	(0.248 of variance, cumulative =  0.795)

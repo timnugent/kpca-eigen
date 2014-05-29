@@ -240,14 +240,14 @@ int main(int argc, const char* argv[]){
 	PCA* P = new PCA();
 	P->load_data("data/test.data");
 	P->run_pca();
-	cout << "Regular PCA:" << endl;
+	cout << "Regular PCA (data/test.data):" << endl;
 	P->run_pca();
 	P->print();
 	delete P;
 
 	P = new PCA();
 	P->load_data("data/wikipedia.data");
-	cout << "Kernel PCA - RBF kernel, gamma = 0.001:" << endl;
+	cout << "Kernel PCA (data/wikipedia.data) - RBF kernel, gamma = 0.001:" << endl;
 	P->run_kpca();
 	P->write_eigenvectors("data/eigenvectors_RBF_data.csv");
 	P->write_transformed("data/transformed_RBF_data.csv");
@@ -259,7 +259,7 @@ int main(int argc, const char* argv[]){
 	P->set_kernel(2);
 	P->set_constant(1);
 	P->set_order(2);
-	cout << "Kernel PCA - Polynomial kernel, order = 2, constant = 1:" << endl;
+	cout << "Kernel PCA (data/wikipedia.data) - Polynomial kernel, order = 2, constant = 1:" << endl;
 	P->run_kpca();
 	P->write_eigenvectors("data/eigenvectors_Polynomial_data.csv");
 	P->write_transformed("data/transformed_Polynomial_data.csv");	
