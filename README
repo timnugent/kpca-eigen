@@ -1,10 +1,12 @@
-PCA using the Eigen linear algebra library
-------------------------------------------
+Kernel PCA using the Eigen linear algebra library
+-------------------------------------------------
 Tim Nugent 2014
 
 Uses the covariance/eigendecomposition method:
 
 http://en.wikipedia.org/wiki/Principal_component_analysis#Computing_PCA_using_the_covariance_method
+
+Current kernels are RBF and polynomial.
 
 Build
 -----
@@ -24,7 +26,7 @@ Run
 
 Run with 'make test', or:
 
-bin/pca data/test.data
+bin/kpca
 
 Input file format is a comma delimited n X p data matrix (n observations, p variables), e.g.:
 
@@ -37,8 +39,15 @@ Input file format is a comma delimited n X p data matrix (n observations, p vari
 Output
 ------
 
-bin/pca data/test.data
+If R is installed, see the following plots:
 
+wikipedia_data.png
+wikipedia_RBF_transformed.png
+wikipedia_Polynomial_transformed.png
+
+stdout:
+
+Regular PCA:
 Input data:
 32 26 51 12
 17 13 34 35
@@ -90,15 +99,37 @@ Transformed data:
 -113.036  5.31814  37.5604 -25.4912
 -75.8841 -6.75481  4.97735  -24.924
 
-Transformed centred data:
-  36.8075  -19.9493   6.45993 -0.762274
-  43.3909   14.1573   4.98168   1.03062
- -47.7637  -13.8901   1.08492   1.00009
- -34.7933   15.8775   10.0283  -0.91779
-  2.35857   3.80454  -22.5548  -0.35065
+Kernel PCA - RBF kernel, gamma = 0.001:
+Sorted eigenvalues:
+PC 1: Eigenvalue: 145.3	(0.931 of variance, cumulative =  0.931)
+PC 2: Eigenvalue: 6.68255	(0.043 of variance, cumulative =  0.974)
+PC 3: Eigenvalue: 3.66329	(0.023 of variance, cumulative =  0.998)
+PC 4: Eigenvalue: 0.141679	(0.001 of variance, cumulative =  0.999)
+PC 5: Eigenvalue: 0.133171	(0.001 of variance, cumulative =  0.999)
+PC 6: Eigenvalue: 0.0729222	(0.000 of variance, cumulative =  1.000)
+...
+PC 99: Eigenvalue: 8.36113e-18	(0.000 of variance, cumulative =  1.000)
+PC 100: Eigenvalue: 8.36113e-18	(0.000 of variance, cumulative =  1.000)
 
-Written file eigenvectors.csv
-Written file transformed_data.csv
+Written file data/eigenvectors_RBF_data.csv
+Written file data/transformed_RBF_data.csv
+
+Kernel PCA - Polynomial kernel, order = 2, constant = 1:
+Sorted eigenvalues:
+PC 1: Eigenvalue: 176542	(0.548 of variance, cumulative =  0.548)
+PC 2: Eigenvalue: 79802.3	(0.248 of variance, cumulative =  0.795)
+PC 3: Eigenvalue: 54358.5	(0.169 of variance, cumulative =  0.964)
+PC 4: Eigenvalue: 7483.66	(0.023 of variance, cumulative =  0.987)
+PC 5: Eigenvalue: 4058.28	(0.013 of variance, cumulative =  1.000)
+...
+PC 77: Eigenvalue: 9.0432e-17	(0.000 of variance, cumulative =  1.000)
+PC 78: Eigenvalue: 9.0432e-17	(0.000 of variance, cumulative =  1.000)
+
+Written file data/eigenvectors_Polynomial_data.csv
+Written file data/transformed_Polynomial_data.csv
+
+Plotting data using R...
+src/plot.R
 
 Bugs
 ----
