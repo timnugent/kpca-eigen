@@ -17,7 +17,7 @@ public:
 	void set_components(const int i){components = i;};
 	void set_kernel(const int i){kernel_type = i;};	
 	void set_normalise(const int i){normalise = i;};
-	void set_gamma(const int i){gamma = i;};
+	void set_gamma(const double i){gamma = i;};
 	void set_constant(const int i){constant = i;};
 	void set_order(const int i){order = i;};
 	MatrixXd& get_transformed(){return transformed;}	
